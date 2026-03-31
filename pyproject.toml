@@ -1,0 +1,52 @@
+[build-system]
+# setuptools 77+ emits PEP 639 `License-Expression` / `License-File` metadata; many twine
+# releases still fail `twine check` on those fields. Stay on 68–76 for classic METADATA.
+requires = ["setuptools>=68,<77", "wheel", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kalyxpq"
+dynamic = ["version"]
+description = "Developer-friendly hybrid post-quantum session security library."
+readme = "README.md"
+requires-python = ">=3.10"
+# Full Apache 2.0 text in LICENSE; classic METADATA (twine/PyPI compatible). SPDX: Apache-2.0.
+license = { file = "LICENSE" }
+authors = [{ name = "AMPONSAH Elliot" }]
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "cryptography>=42.0.0",
+  "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+oqs = ["liboqs-python>=0.10.0"]
+msgpack = ["msgpack>=1.0.8"]
+dev = [
+  "pytest>=8.0.0",
+  "pytest-asyncio>=0.23.0",
+  "build>=1.2.0",
+  "setuptools-scm>=8",
+  "twine>=6.1.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# Tag-based SemVer: use annotated tags like v0.1.0 (leading "v" is stripped for PEP 440).
+# `no-local-version` omits PEP 440 local segments (+gSHA...) — PyPI rejects wheels whose
+# version string contains '+' for normal project uploads.
+[tool.setuptools_scm]
+fallback_version = "0.0.0"
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"

@@ -1,0 +1,21 @@
+.pytest_cache/
+.venv/
+.env
+__pycache__/
+*.py[cod]
+
+# Build outputs (never commit — stale wheels break PyPI uploads)
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Private / local docs (optional — remove these lines if you want them versioned)
+README_INTERNAL.md
+README_RESEARCH.md
+
+# Research outputs and personal benchmark data (keep local)
+research_data/
+benchmarks/
+*.csv
+*.png
