@@ -7,12 +7,13 @@ import asyncio
 import httpx
 
 from kalyxpq import HTTPHandshakeTransport, KalyxEngine
+from kalyxpq.engine import MockKemAdapter
 
 from examples.http_server_mock import build_mock_transport
 
 
 async def main() -> None:
-    engine = KalyxEngine(strict_pq=False)
+    engine = KalyxEngine(kem_adapter=MockKemAdapter(), strict_pq=False)
     artifacts, client_classical_private, client_pq_secret = engine.client_prepare()
 
     transport = build_mock_transport()
