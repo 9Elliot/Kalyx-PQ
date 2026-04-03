@@ -1,7 +1,7 @@
 import pytest
 
 from kalyxpq.engine import KalyxEngine, MockKemAdapter
-from kalyxpq.exceptions import KalyxSecurityError
+from kalyxpq.exceptions import DependencyUnavailableError, KalyxSecurityError
 
 
 def test_hybrid_handshake_derives_same_key():
@@ -35,3 +35,21 @@ def test_strict_pq_rejects_mock_kem_usage():
     engine = KalyxEngine(kem_adapter=MockKemAdapter(), strict_pq=True)
     with pytest.raises(KalyxSecurityError):
         engine.client_prepare()
+
+
+def test_default_engine_propagates_when_oqs_unavailable(monkeypatch: pytest.MonkeyPatch) -> None:
+    def _raise(*_a: object, **_kw: object) -> None:
+        raise DependencyUnavailableError("no liboqs in test")
+
+    monkeypatch.setattr("kalyxpq.engine.OqsKemAdapter", _raise)
+    with pytest.raises(DependencyUnavailableError):
+        KalyxEngine(allow_mock_kem=False)
+
+
+def test_allow_mock_kem_true_falls_back_when_oqs_unavailable(monkeypatch: pytest.MonkeyPatch) -> None:
+    def _raise(*_a: object, **_kw: object) -> None:
+        raise DependencyUnavailableError("no liboqs in test")
+
+    monkeypatch.setattr("kalyxpq.engine.OqsKemAdapter", _raise)
+    engine = KalyxEngine(allow_mock_kem=True, strict_pq=False)
+    assert engine.kem_algorithm.startswith("MOCK")

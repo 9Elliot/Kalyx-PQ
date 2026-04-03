@@ -42,6 +42,12 @@ class OqsKemAdapter:
             raise DependencyUnavailableError(
                 "liboqs-python is required for ML-KEM operations."
             ) from exc
+        if not hasattr(oqs, "KeyEncapsulation"):
+            raise DependencyUnavailableError(
+                "liboqs-python is installed but the native liboqs library did not load "
+                "(missing .so/.dll, or failed build). Install liboqs, set OQS_INSTALL_PATH if needed, "
+                "or run in the official Docker image for this project."
+            )
         self._oqs = oqs
 
     def generate_keypair(self) -> tuple[bytes, bytes]:
@@ -120,6 +126,10 @@ class KalyxEngine:
 
     A session key is derived from both secrets so that confidentiality remains
     if either layer withstands future cryptanalysis.
+
+    By default the engine uses **liboqs** (``pip install 'kalyxpq[oqs]'``) and does **not**
+    fall back to a placeholder KEM. For unit tests only, pass ``allow_mock_kem=True`` or
+    ``kem_adapter=MockKemAdapter()``.
     """
 
     def __init__(
@@ -128,6 +138,7 @@ class KalyxEngine:
         *,
         key_length: int = 32,
         strict_pq: bool = True,
+        allow_mock_kem: bool = False,
         telemetry: TelemetryCollector | None = None,
     ):
         if kem_adapter is not None:
@@ -136,6 +147,8 @@ class KalyxEngine:
             try:
                 self._kem = OqsKemAdapter(algorithm="ML-KEM-768")
             except DependencyUnavailableError:
+                if not allow_mock_kem:
+                    raise
                 self._kem = MockKemAdapter()
         self._key_length = key_length
         self._strict_pq = strict_pq

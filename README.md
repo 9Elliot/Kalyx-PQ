@@ -7,11 +7,15 @@ Kalyx-PQ mitigates this by combining **classical X25519** and **ML-KEM (Kyber fa
 
 ## Quick Start
 
+`KalyxEngine()` uses **real ML-KEM** via [liboqs](https://github.com/open-quantum-safe/liboqs) (install the optional `oqs` extra and ensure native `liboqs` is on the loader path, e.g. set `OQS_INSTALL_PATH`).
+
 ```python
 from kalyxpq import KalyxEngine
-e = KalyxEngine()
+e = KalyxEngine()  # strict_pq=True by default; requires liboqs + liboqs-python
 artifacts, classical_priv, pq_secret = e.client_prepare()
 ```
+
+For **unit tests** without liboqs, use `KalyxEngine(kem_adapter=MockKemAdapter(), strict_pq=False)` or `KalyxEngine(allow_mock_kem=True, strict_pq=False)` (never rely on silent mock in production).
 
 ## Installation
 
@@ -25,11 +29,13 @@ For MessagePack payload serialization:
 pip install "kalyxpq[msgpack]"
 ```
 
-For production PQC with liboqs:
+For **production** hybrid PQ (recommended):
 
 ```bash
 pip install "kalyxpq[oqs]"
 ```
+
+On **Windows**, building or loading liboqs locally is often painful; use **WSL2**, a **Linux CI image**, or **Docker** for development and integration tests so `liboqs` is available in a predictable path.
 
 For development:
 

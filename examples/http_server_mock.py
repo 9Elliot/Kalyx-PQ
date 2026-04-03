@@ -15,8 +15,10 @@ from kalyxpq import (
     decrypt_result,
     kalyx_safe,
 )
+from kalyxpq.engine import MockKemAdapter
 
-_SERVER_ENGINE = KalyxEngine(strict_pq=False)
+# In-process mock HTTP transport: both sides must use the same KEM (mock here, no liboqs).
+_SERVER_ENGINE = KalyxEngine(kem_adapter=MockKemAdapter(), strict_pq=False)
 _API_DECORATOR_KEY = b"\xA5" * 32
 
 
@@ -76,7 +78,7 @@ if __name__ == "__main__":
     # Small manual smoke test that does not need a real network server.
     async def _demo() -> None:
         transport = build_mock_transport()
-        client_engine = KalyxEngine(strict_pq=False)
+        client_engine = KalyxEngine(kem_adapter=MockKemAdapter(), strict_pq=False)
         artifacts, client_classical_private, client_pq_secret = client_engine.client_prepare()
         async with httpx.AsyncClient(transport=transport, base_url="https://mock.kalyx") as client:
             handshake = await client.post(
